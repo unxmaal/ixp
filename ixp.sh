@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #!/sbin/env bash
 
 # Set common variables
@@ -50,40 +51,40 @@ post_snapshot(){
 }
 
 flist_header(){
-    cat "${_pkgname}.list" <<EOF
+    cat  <<EOF > "${_pkgname}.list"
 # Directories...
-$prefix=${_install_prefix}
-$exec_prefix=${_install_prefix}
-$bindir=${exec_prefix}/bin
-$datarootdir=${_install_prefix}/share
-$datadir=${_install_prefix}/share
-$docdir=${datadir}/doc/epm
-$libdir=${_install_prefix}/lib
-$mandir=${datarootdir}/man
-$srcdir=.
+\$prefix=${_install_prefix}
+\$exec_prefix=${_install_prefix}
+\$bindir=\${exec_prefix}/bin
+\$datarootdir=${_install_prefix}/share
+\$datadir=${_install_prefix}/share
+\$docdir=\${datadir}/doc/epm
+\$libdir=${_install_prefix}/lib
+\$mandir=\${datarootdir}/man
+\$srcdir=.
 
 # Product information
 %product ESP Package Manager
 %copyright 1999-2017 by Michael R Sweet, All Rights Reserved.
 %vendor Easy Software Products
-%license ${srcdir}/COPYING
-%readme ${srcdir}/README.md
+%license \${srcdir}/COPYING
+%readme \${srcdir}/README.md
 %description Universal software packaging tool for UNIX.
 %version 4.4 440
 EOF
 }
 
 gen_specfile(){
-    echo
+    flist_header
 }
 
 main(){
-    pre_check
-    gen_config
-    pre_snapshot
-    build_pkg
-    post_snapshot
-
+    #pre_check
+    #gen_config
+    #pre_snapshot
+    #build_pkg
+    #post_snapshot
+    gen_specfile
 }
 
 main
