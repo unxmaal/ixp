@@ -39,11 +39,19 @@ pre_snapshot(){
     find "${_packaging_prefix}" > snapshot.pre
 }
 
+
 build_pkg(){
-    pushd "$PWD"
-    cd "irixports/${_pkgname}"
+    _wd="$PWD"
+    cd "irixports/${_pkgname}" || die 
+    
+    # import vars from package.sh
+    source ./package.sh
+    unset files
+    _product="$port"
+    _version="$version"
+
     ./package.sh || die "ERROR: build for $_pkgname failed!"
-    popd
+    cd "$_wd" || die
 }
 
 post_snapshot(){
@@ -64,13 +72,13 @@ flist_header(){
 \$srcdir=.
 
 # Product information
-%product ESP Package Manager
-%copyright 1999-2017 by Michael R Sweet, All Rights Reserved.
-%vendor Easy Software Products
-%license \${srcdir}/COPYING
-%readme \${srcdir}/README.md
-%description Universal software packaging tool for UNIX.
-%version 4.4 440
+%product ${_product}
+%copyright 2019 SGUG
+%vendor SGUG
+%license null
+%readme null
+%description null
+%version ${_version}
 EOF
 }
 
@@ -79,11 +87,11 @@ gen_specfile(){
 }
 
 main(){
-    #pre_check
-    #gen_config
-    #pre_snapshot
-    #build_pkg
-    #post_snapshot
+    pre_check
+    gen_config
+    pre_snapshot
+    build_pkg
+    post_snapshot
     gen_specfile
 }
 
