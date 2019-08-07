@@ -27,11 +27,15 @@ precheck(){
     if [[ ! -d irixports ]] ; then
         git clone -b "${_irixports_branch}" "${_irixports_repo}"
     fi
+
+    mkdir -p "$_packaging_prefix"
 }
 
 gen_config(){
     if [[ ! -f irixports/config.sh ]] ; then
-        echo "${_packaging_prefix}" > irixports/config.sh
+        cat <<EOF > irixports/config.sh
+prefix="$_packaging_prefix"
+EOF
     fi
 }
 
@@ -87,7 +91,7 @@ gen_specfile(){
 }
 
 main(){
-    pre_check
+    precheck
     gen_config
     pre_snapshot
     build_pkg
