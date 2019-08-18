@@ -7,6 +7,10 @@ _irixports_branch="${_irixports_branch:-master}"
 _packaging_prefix="${_packaging_prefix:-/opt/ixp}"
 
 _pkgname=$1
+if [[ -z "$_pkgname" ]] ; then 
+    echo "Usage: ./ixp.sh <portname>"
+    exit 0
+fi
 
 if [[ -f .config ]] ; then
     . .config
@@ -50,26 +54,35 @@ build_pkg(){
     # import vars from package.sh
     source ./package.sh
     unset files
-    _product="$port"
-    _version="$version"
+    _product="$port:-null"
+    _version="$version:-1.0.0"
 
     ./package.sh || die "ERROR: build for $_pkgname failed!"
     cd "$_wd" || die
 }
 
 post_snapshot(){
-        find "${_packaging_prefix}" > snapshot.post
+    find "${_packaging_prefix}" > snapshot.post
 }
 
 find_file(){
-	local _f="${1}"
-	local _t="${2}"
-	_p=$(find "./irixports/${_pkgname}/." -name "$_f" | head -n1)
-		if [[ -z "$_p" ]] ; then 
-				touch _p
-				if [[ $_t == "license" ]] ; then
-					
-		fi
+    local _f="${1}"
+    local _t="${2}"
+    _p=$(find "./irixports/${_pkgname}/." -name "$_f" | head -n1)
+        if [[ -z "$_p" ]] ; then 
+            touch "$_p"
+            if [[ "$_t" == "license" ]] ; then
+                _license="$_p"
+            elif [[ $_t == "readme" ]] ; then
+                _readme="$_p"
+            fi
+        else
+            if [[ "$_t" == "license" ]] ; then
+                _license="$_p"
+            elif [[ $_t == "readme" ]] ; then
+                _readme="$_p"
+            fi
+        fi
 }
 
 flist_header(){
@@ -77,19 +90,26 @@ flist_header(){
 %product ${_product}
 %copyright 2019 SGUG
 %vendor SGUG
-%license license
-%readme readme
-%description testing
+%license "${_license}"
+%readme "${_readme}"
+%description SGUG Package for "${_pkgname}"
 %version ${_version}
 EOF
 }
 
 run_epm(){
-	python spec.py -h header -t -p "${_pkgname}" -e $(cat snapshot.post) 
+    python spec.py -h header -t -p "${_pkgname}" -e $(cat snapshot.post) 
 }
 
 gen_specfile(){
     flist_header
+}
+
+cleanup(){
+    _wd="$PWD"
+    cd "irixports/${_pkgname}" || die 
+    ./package.sh clean|| die "ERROR: cleanup for $_pkgname failed!"
+    cd "$_wd" || die
 }
 
 main(){
@@ -98,6 +118,8 @@ main(){
     pre_snapshot
     build_pkg
     post_snapshot
+    find_file LICENSE
+    find_file README
     gen_specfile
     run_epm
 }
