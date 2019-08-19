@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#!/sbin/env bash
+##!/sbin/env bash
 
 # Set common variables
 _irixports_repo="${_irixports_repo:-https://github.com/larb0b/irixports.git}"
@@ -70,11 +70,11 @@ find_file(){
     local _t="${2}"
     _p=$(find "./irixports/${_pkgname}/." -name "$_f" | head -n1)
         if [[ -z "$_p" ]] ; then 
-            touch "$_p"
+            touch "./$_f"
             if [[ "$_t" == "license" ]] ; then
-                _license="$_p"
+                _license="./$_f"
             elif [[ $_t == "readme" ]] ; then
-                _readme="$_p"
+                _readme="./$_f"
             fi
         else
             if [[ "$_t" == "license" ]] ; then
@@ -95,6 +95,10 @@ flist_header(){
 %description SGUG Package for "${_pkgname}"
 %version ${_version}
 EOF
+}
+
+gen_diff(){
+    diff snapshot.pre snapshot.post > modified.list
 }
 
 run_epm(){
@@ -118,10 +122,12 @@ main(){
     pre_snapshot
     build_pkg
     post_snapshot
+    gen_diff
     find_file LICENSE
     find_file README
     gen_specfile
     run_epm
+    cleanup
 }
 
 main
