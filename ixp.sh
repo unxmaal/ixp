@@ -43,7 +43,7 @@ EOF
 }
 
 pre_snapshot(){
-    find "${_packaging_prefix}" > snapshot.pre
+    find "${_packaging_prefix}" > "${_pkgname}snapshot.pre"
 }
 
 
@@ -54,15 +54,15 @@ build_pkg(){
     # import vars from package.sh
     source ./package.sh
     unset files
-    _product="$port:-null"
-    _version="$version:-1.0.0"
+    _product="${port:-null}"
+    _version="${version:-1.0.0}"
 
     ./package.sh || die "ERROR: build for $_pkgname failed!"
     cd "$_wd" || die
 }
 
 post_snapshot(){
-    find "${_packaging_prefix}" > snapshot.post
+    find "${_packaging_prefix}" > "${_pkgname}snapshot.post"
 }
 
 find_file(){
@@ -86,7 +86,7 @@ find_file(){
 }
 
 flist_header(){
-    cat  <<EOF > "header"
+    cat  <<EOF > "${_pkgname}.header"
 %product ${_product}
 %copyright 2019 SGUG
 %vendor SGUG
