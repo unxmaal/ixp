@@ -43,7 +43,7 @@ EOF
 }
 
 pre_snapshot(){
-    find "${_packaging_prefix}" > "${_pkgname}snapshot.pre"
+    find "${_packaging_prefix}" > "${_pkgname}.snapshot.pre"
 }
 
 
@@ -62,7 +62,7 @@ build_pkg(){
 }
 
 post_snapshot(){
-    find "${_packaging_prefix}" > "${_pkgname}snapshot.post"
+    find "${_packaging_prefix}" > "${_pkgname}.snapshot.post"
 }
 
 find_file(){
@@ -98,11 +98,11 @@ EOF
 }
 
 gen_diff(){
-    diff snapshot.pre snapshot.post > modified.list
+    diff "${_pkgname}.snapshot.pre" "${_pkgname}.snapshot.post" > "${_pkgname}.modified.list"
 }
 
 run_epm(){
-    python spec.py -h header -t -p "${_pkgname}" -e $(cat snapshot.post) 
+    python spec.py -h "${_pkgname}.header" -t -p "${_pkgname}" -e $(cat "${_pkgname}.modified.list") 
 }
 
 gen_specfile(){
