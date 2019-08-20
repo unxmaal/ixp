@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
-##!/sbin/env bash
+
+# NOTE set #!/sbin/env bash if you must.
 
 # Set common variables
 _irixports_repo="${_irixports_repo:-https://github.com/larb0b/irixports.git}"
 _irixports_branch="${_irixports_branch:-master}"
 _packaging_prefix="${_packaging_prefix:-/opt/ixp}"
 
-_pkgname=$1
+_action=$1
+_pkgname=$2
+
 if [[ -z "$_pkgname" ]] ; then 
-    echo "Usage: ./ixp.sh <portname>"
+    echo "Usage: ./ixp.sh <action> <portname>"
+    echo "      Actions:"
+    echo "          install = install package"
+    echo "          clean = clean up"
     exit 0
 fi
 
@@ -36,6 +42,8 @@ precheck(){
 
 gen_config(){
     if [[ ! -f irixports/config.sh ]] ; then
+        echo "config.sh not detected."
+        echo "Creating irixports/config.sh . Delete this later if needed."
         cat <<EOF > irixports/config.sh
 prefix="$_packaging_prefix"
 EOF
@@ -109,6 +117,13 @@ gen_specfile(){
     flist_header
 }
 
+save_filelist(){
+    mkdir -p "${_pkgname}.info"
+    if [[ -f "${_pkgname}.modified.list" ]] ; then
+        mv "${_pkgname}.modified.list" "${_pkgname}.info"
+    fi
+}
+
 cleanup(){
     _wd="$PWD"
     cd "irixports/${_pkgname}" || die 
@@ -130,4 +145,20 @@ main(){
     cleanup
 }
 
-main
+case $_action in
+    install)
+        echo -n "Installing ${_pkgname}"
+        main
+        ;;
+    
+    clean)
+        echo -n "Cleaning up"
+        cleanup
+        ;;
+
+    *)
+        echo -n "Installing ${_pkgname}"
+        main
+        ;;
+
+esac
