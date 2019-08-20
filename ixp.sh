@@ -10,10 +10,11 @@ _packaging_prefix="${_packaging_prefix:-/opt/ixp}"
 _action=$1
 _pkgname=$2
 
-if [[ -z "$_pkgname" ]] ; then 
+if [[ -z "$_action" ]] ; then 
     echo "Usage: ./ixp.sh <action> <portname>"
     echo "      Actions:"
-    echo "          install = install package"
+    echo "          list = list available irixports ports"
+    echo "          build = build port"
     echo "          clean = clean up"
     exit 0
 fi
@@ -131,6 +132,11 @@ cleanup(){
     cd "$_wd" || die
 }
 
+list_ports(){
+    precheck
+    ls -1 irixports/ | egrep -v "LICENSE|README.md|*.sh"
+}
+
 main(){
     precheck
     gen_config
@@ -146,19 +152,24 @@ main(){
 }
 
 case $_action in
-    install)
-        echo -n "Installing ${_pkgname}"
+    build)
+        echo -n "Building and installing ${_pkgname}"
         main
         ;;
-    
+
+    list)
+        echo -n "Available ports:"
+        list_ports
+        ;;
+
     clean)
         echo -n "Cleaning up"
         cleanup
         ;;
 
     *)
-        echo -n "Installing ${_pkgname}"
-        main
+        echo -n "Available ports:"
+        list_ports
         ;;
 
 esac
