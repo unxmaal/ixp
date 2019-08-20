@@ -30,7 +30,7 @@ die(){
 }
 
 precheck(){
-    if ! which epm ; then
+    if ! which epm > /dev/null 2>&1; then
         die "ERROR: epm is required"
     fi
 
@@ -153,22 +153,22 @@ main(){
 
 case $_action in
     build)
-        echo -n "Building and installing ${_pkgname}"
+        echo "Building and installing ${_pkgname}"
         main
         ;;
 
     list)
-        echo -n "Available ports:"
+        echo "Available ports:"
         list_ports
         ;;
 
     clean)
-        echo -n "Cleaning up"
+        echo "Cleaning up"
         cleanup
         ;;
 
     *)
-        echo -n "Available ports:"
+        echo "Available ports:"
         list_ports
         ;;
 
