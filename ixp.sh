@@ -5,7 +5,7 @@
 # Set common variables
 _irixports_repo="${_irixports_repo:-https://github.com/larb0b/irixports.git}"
 _irixports_branch="${_irixports_branch:-master}"
-_packaging_prefix="${_packaging_prefix:-/opt/ixp}"
+_packaging_prefix="${_packaging_prefix:-/usr/ixp}"
 
 _action=$1
 _pkgname=$2
@@ -107,11 +107,11 @@ EOF
 }
 
 gen_diff(){
-    diff "${_pkgname}.snapshot.pre" "${_pkgname}.snapshot.post" > "${_pkgname}.modified.list"
+    diff "${_pkgname}.snapshot.pre" "${_pkgname}.snapshot.post" | grep -v packages.db | grep '>' | awk '{print $2}' > "${_pkgname}.modified.list"
 }
 
 run_epm(){
-    python spec.py -h "${_pkgname}.header" -t -p "${_pkgname}" -e $(cat "${_pkgname}.modified.list") 
+    python spec.py -h "${_pkgname}.header" -t -p "${_pkgname}" -f $(cat "${_pkgname}.modified.list") -e
 }
 
 gen_specfile(){

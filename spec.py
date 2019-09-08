@@ -19,12 +19,13 @@ def debug(string):
         err(string)
         
 def usage():
-    err("Usage: %s (options) <paths>" % sys.argv[0])
+    err("Usage: %s (options)" % sys.argv[0])
     err(" -d<dir>     create destination paths relative to dir")
     err(" -u<uid>     force uid on all files")
     err(" -g<gid>     force gid on all files")
     err(" -h<header>  use this file as package header")
     err(" -p<name>    package name")
+    err(" -f<name>    file with list of files for packaging")
     err(" -t          run epm to create a tardist")
     err(" -v          verbose output")
     err(" -e          output the generated tardist name to stdout after completion")
@@ -47,7 +48,7 @@ symlinks = []
 echo_tardist = False
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "u:g:d:h:p:tve")
+    opts, args = getopt.getopt(sys.argv[1:], "u:g:d:h:p:f:tve")
 except getopt.GetoptError as getopt_err:
     # print help information and exit:
     err(getopt_err)  # will print something like "option -a not recognized"
@@ -64,6 +65,8 @@ for o, a in opts:
         header_file = a
     elif o == '-p':
         package_name = a
+    elif o == "-f":
+        plist = a
     elif o == '-t':
         run_epm = True
     elif o == '-v':
@@ -71,8 +74,15 @@ for o, a in opts:
     elif o == '-e':
         echo_tardist = True
 
-paths = args
+filelist = Path(plist)
+with filelist.open() as f:
+    paths = f.readlines()
+    #print(paths)
 
+for path in paths:
+    print(path.rstrip())
+
+#sys.exit()
 def get_info(path, known_type=''):
     src = path
     if strip_prefix:
@@ -124,7 +134,7 @@ if header_file is not None:
         output(f.read())
         
 while len(paths):
-    path = os.path.abspath(paths.pop())
+    path = os.path.abspath(paths.pop().rstrip())
     debug("processing %s" % path)
     for root, dirs, files in os.walk(path):
         firstpart = Path(root).parts[1]
@@ -137,7 +147,6 @@ while len(paths):
             output("%s %s %s %s \"%s\" \"%s\"" % get_info(fpath))
 
 output_fd.close()
-            
 if run_epm:
     for path in symlinks:
         src = '/' + path
